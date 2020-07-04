@@ -6,9 +6,9 @@ var score = 0,
 player = {
   x : 50,
   y : 100,
-  pacmouth : 320,
-  pacdir : 0,
-  psize : 32,
+  pacMouth : 320,
+  pacDirection : 0,
+  pSize : 32,
   speed : 7
 };
 
@@ -20,25 +20,25 @@ var enemy = {
   dirx : 0,
   diry : 0,
   flash : 0,
-  ghosteat : false
+  ghostEatFlag : false  //Once eat, this goes as true
 };
 
 var enemy2 = {
   x : 150,
   y : 200,
   speed : 5,
-  moving :  0,
+  moving : 0,
   dirx :  0,
   diry :  0,
   flash : 0,
-  ghosteat :  false
+  ghostEatFlag :  false
 };
 
-var powerdot = {
+var powerDot = {
   x : 10,
   y : 10,
   powerup :  false,
-  pcountdown : 0,
+  powerTimer : 0,   //Once eat, this timer sets and goes down
   ghostNum : 0,
   ghostNum2 : 0
   
@@ -71,20 +71,33 @@ document.addEventListener('keyup',function (event) {
   delete keyclick[event.keyCode];
 },false);
 
+//Arrow key event, move the pacman
 function move(keyclick) {
-    if(37 in keyclick){player.x -= player.speed;player.pacdir=64;}
-    if(38 in keyclick){player.y -= player.speed;player.pacdir=96;}
-    if(39 in keyclick){player.x += player.speed;player.pacdir=0;}
-    if(40 in keyclick){player.y += player.speed;player.pacdir=32;}
+    if(37 in keyclick) {
+      player.x -= player.speed;
+      player.pacDirection=64;
+    }
+    if(38 in keyclick) { 
+      player.y -= player.speed;
+      player.pacDirection=96;
+    }
+    if(39 in keyclick) {
+      player.x += player.speed;
+      player.pacDirection=0;
+    }
+    if(40 in keyclick) {
+      player.y += player.speed;
+      player.pacDirection=32;
+    }
     
     if(player.x >= (canvas.width-32)) {player.x=0;}
     if(player.y >= (canvas.height-32)) {player.y=0;}
     if(player.x < 0){player.x=(canvas.width-32);}
     if(player.y < 0){player.y=(canvas.height-32);}
-    if(player.pacmouth == 320) {
-      player.pacmouth = 352;
+    if(player.pacMouth == 320) {
+      player.pacMouth = 352;
     } else {
-      player.pacmouth = 320;
+      player.pacMouth = 320;
     }
     render();
 }
@@ -110,10 +123,10 @@ function render() {
   context.fillStyle = "black";
   context.fillRect(0,0,canvas.width,canvas.height);
 
-  if(!powerdot.powerup && powerdot.pcountdown < 5){
-      powerdot.x = myNum(420)+30;
-      powerdot.y = myNum(250);
-      powerdot.powerup = true;
+  if(!powerDot.powerup && powerDot.powerTimer < 5){
+      powerDot.x = myNum(420)+30;
+      powerDot.y = myNum(250);
+      powerDot.powerup = true;
 
   }
 
@@ -136,7 +149,7 @@ function render() {
     enemy.speed = myNum(2)+1;
     enemy.dirx = 0;
     enemy.diry = 0;
-    if(powerdot.ghosteat) {enemy.speed = enemy.speed*-1;}
+    if(powerDot.ghostEatFlag) {enemy.speed = enemy.speed*-1;}
     if(enemy.moving % 2){
       if(player.x < enemy.x){enemy.dirx = -enemy.speed;}else{enemy.dirx = enemy.speed;}
     }else{
@@ -148,7 +161,7 @@ function render() {
     enemy2.speed = myNum(2)+1;
     enemy2.dirx = 0;
     enemy2.diry = 0;
-    if(powerdot.ghosteat) {enemy2.speed = enemy2.speed*-1;}
+    if(powerDot.ghostEatFlag) {enemy2.speed = enemy2.speed*-1;}
     if(enemy2.moving % 2){
       if(player.x < enemy2.x){enemy2.dirx = -enemy2.speed;}else{enemy2.dirx = enemy2.speed;}
     }else{
@@ -181,7 +194,7 @@ function render() {
       player.y <= (enemy.y+26) &&  
       enemy.y <= (player.y +32)) {
         console.log('ghost');
-        if(powerdot.ghosteat) {
+        if(powerDot.ghostEatFlag) {
           score++;
         } else {
           gscore++;
@@ -190,7 +203,7 @@ function render() {
         player.y = 100;
         enemy.x = 300; 
         enemy.y = 200;
-        powerdot.pcountdown = 0;
+        powerDot.powerTimer = 0;
     }
 
         //collision detecction ghost2Flag
@@ -199,7 +212,7 @@ function render() {
       player.y <= (enemy2.y+26) &&  
       enemy2.y <= (player.y +32)) {
         console.log('ghost');
-        if(powerdot.ghosteat) {
+        if(powerDot.ghostEatFlag) {
           score++;
         } else {
           gscore++;
@@ -208,44 +221,44 @@ function render() {
         player.y = 100;
         enemy2.x = 300; 
         enemy2.y = 200;
-        powerdot.pcountdown = 0;
+        powerDot.powerTimer = 0;
     }
 
 
     //Collision Detection powerup
-    if(player.x <= (powerdot.x-10) &&
-      powerdot.x <= (player.x+32) && 
-      player.y <= (powerdot.y-10) &&  
-      powerdot.y <= (player.y +32)) {
+    if(player.x <= (powerDot.x-10) &&
+      powerDot.x <= (player.x+32) && 
+      player.y <= (powerDot.y-10) &&  
+      powerDot.y <= (player.y +32)) {
         console.log('hit');
-        powerdot.powerup = false;
-        powerdot.pcountdown = 500;
-        powerdot.ghostNum = enemy.ghostNum;
-        powerdot.ghostNum2 = enemy2.ghostNum;
+        powerDot.powerup = false;
+        powerDot.powerTimer = 500;
+        powerDot.ghostNum = enemy.ghostNum;
+        powerDot.ghostNum2 = enemy2.ghostNum;
         enemy.ghostNum = 384;
         enemy2.ghostNum = 384;
-        powerdot.x = 0;
-        powerdot.y = 0;
-        powerdot.ghosteat = true;
+        powerDot.x = 0;
+        powerDot.y = 0;
+        powerDot.ghostEatFlag = true;
         player.speed = 10;
     }
   
   //powerup countdown
-  if(powerdot.ghosteat) {
-    powerdot.pcountdown--;
+  if(powerDot.ghostEatFlag) {
+    powerDot.powerTimer--;
   }
-  if(powerdot.pcountdown<=0) {
-    powerdot.ghosteat = false;
-    powerdot.pcountdown--;
-    enemy.ghostNum = powerdot.ghostNum;
-    enemy2.ghostNum = powerdot.ghostNum;
+  if(powerDot.powerTimer<=0) {
+    powerDot.ghostEatFlag = false;
+    powerDot.powerTimer--;
+    enemy.ghostNum = powerDot.ghostNum;
+    enemy2.ghostNum = powerDot.ghostNum;
     player.speed = 7;
   }
 
-  if(powerdot.powerup){
+  if(powerDot.powerup){
       context.fillStyle = "#ffffff";
       context.beginPath();
-      context.arc(powerdot.x, powerdot.y, 10,0, Math.PI * 2, true);
+      context.arc(powerDot.x, powerDot.y, 10,0, Math.PI * 2, true);
       context.closePath();
       context.fill();
   }
@@ -265,7 +278,7 @@ function render() {
   context.drawImage(mainImage,enemy2.ghostNum,enemy2.flash,32,32,enemy2.x,enemy2.y,32,32);
   context.drawImage(mainImage,enemy.ghostNum,enemy.flash,32,32,enemy.x,enemy.y,32,32);
   //pacman draw
-  context.drawImage(mainImage,player.pacmouth,player.pacdir,32,32,player.x,player.y,32,32);
+  context.drawImage(mainImage,player.pacMouth,player.pacDirection,32,32,player.x,player.y,32,32);
 
   context.font = "20px Verdana";
   context.fillStyle = "white";
